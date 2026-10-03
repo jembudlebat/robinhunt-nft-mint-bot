@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package*.json tsconfig.json ./
 
 # Install build dependencies & sqlite native tools
-RUN apk add --no-co-cache python3 make g++
+RUN apk add --no-cache python3 make g++
 
 # Install dependencies
 RUN npm ci
@@ -24,7 +24,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # Install sqlite runtime dependencies
-RUN apk add --no-co-cache sqlite
+RUN apk add --no-cache sqlite
 
 # Copy built application and package files
 COPY package*.json ./
@@ -32,10 +32,8 @@ RUN npm ci --only=production
 
 COPY --from=builder /app/dist ./dist
 
-# Create persistent data volume directory
-RUN mkdir -p /app/data
-
-VOLUME ["/app/data"]
+# Create data directory (attach a Railway Volume at /app/data for persistence)
+RUN mkdir -p /app/data && chown -R node:node /app/data
 
 # Run as non-root user for security
 USER node
